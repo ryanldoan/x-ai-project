@@ -2,7 +2,7 @@
 import sys
 import uuid
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.models.database import init_db, SessionLocal
 from app.utils.db_utils import create_post, get_posts_by_content_type, get_posts_with_media, get_posts_by_media_type

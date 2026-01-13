@@ -1,7 +1,7 @@
 """Test token-based search functionality"""
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.models.database import init_db, SessionLocal
 from app.services.search_service import SearchService

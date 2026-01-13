@@ -2,7 +2,7 @@
 import sys
 import argparse
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.models.database import SessionLocal
 from app.utils.db_utils import get_all_posts, get_post_count
