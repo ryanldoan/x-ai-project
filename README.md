@@ -1,5 +1,8 @@
 # Groktor-X
 
+<img width="1512" height="818" alt="image" src="https://github.com/user-attachments/assets/940c15f2-528a-4e3f-8fc7-01ef1b69acb8" />
+
+
 Grok-powered intelligent search system for X (formerly Twitter) posts. This application enables semantic search, AI-enhanced query understanding, and intelligent summarization of social media content.
 
 ## Table of Contents
