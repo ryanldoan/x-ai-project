@@ -175,18 +175,16 @@ function App() {
                     •{" "}
                     <span
                       className="text-black font-medium hover:underline cursor-pointer"
-                      onClick={() => handleTrendingClick("AI AND space")}
+                      onClick={() => handleTrendingClick("Crypto")}
                     >
-                      AI AND space
+                      Crypto
                     </span>{" "}
                     •{" "}
                     <span
                       className="text-black font-medium hover:underline cursor-pointer"
-                      onClick={() =>
-                        handleTrendingClick("technology OR innovation")
-                      }
+                      onClick={() => handleTrendingClick("Healthcare")}
                     >
-                      technology OR innovation
+                      Healthcare
                     </span>
                   </p>
                 </div>

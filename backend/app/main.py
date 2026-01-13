@@ -8,7 +8,10 @@ from app.models.database import init_db
 app = FastAPI(
     title="Groktor-X",
     description="Grok-powered search system for X posts",
-    version="1.0.0"
+    version="1.0.0",
+    docs_url=None,  # Disable /docs
+    redoc_url=None,  # Disable /redoc
+    openapi_url=None  # Disable /openapi.json
 )
 
 # CORS middleware for frontend access
@@ -34,14 +37,6 @@ async def root():
     """Root endpoint"""
     return {
         "message": "X AI Search API",
-        "version": "1.0.0",
-        "endpoints": {
-            "search": "/api/search",
-            "post": "/api/posts/{post_id}",
-            "list": "/api/posts",
-            "stats": "/api/stats",
-            "health": "/health",
-            "docs": "/docs"
-        }
+        "version": "1.0.0"
     }
 

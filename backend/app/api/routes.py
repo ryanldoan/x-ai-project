@@ -53,10 +53,6 @@ class PostResponse(BaseModel):
     link_urls: List[dict]
     grok_description: Optional[str]
 
-@router.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {"status": "healthy", "service": "x-ai-search"}
 
 @router.post("/api/search", response_model=SearchResponse)
 async def search_posts(
@@ -173,21 +169,4 @@ async def list_posts(
         "offset": offset
     }
 
-@router.get("/api/stats")
-async def get_stats(db: Session = Depends(get_db)):
-    """Get database statistics"""
-    total_posts = get_post_count(db)
-    
-    # Get posts by author
-    from app.utils.db_utils import get_all_posts
-    all_posts = get_all_posts(db, limit=1000)
-    authors = {}
-    for post in all_posts:
-        authors[post.author] = authors.get(post.author, 0) + 1
-    
-    return {
-        "total_posts": total_posts,
-        "authors": authors,
-        "top_authors": dict(sorted(authors.items(), key=lambda x: x[1], reverse=True)[:10])
-    }
 
