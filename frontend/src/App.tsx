@@ -13,17 +13,38 @@ function App() {
   const [author, setAuthor] = useState("");
   const [contentType, setContentType] = useState("");
   const [sortBy, setSortBy] = useState("relevance");
+  const [offset, setOffset] = useState(0);
+  const [limit] = useState(20);
+
+  // Cache for query summary and enhanced query (keyed by query signature)
+  const [queryCache, setQueryCache] = useState<
+    Map<string, { summary?: string; enhanced_query?: any }>
+  >(new Map());
+
+  const getQuerySignature = (
+    query: string,
+    author: string,
+    contentType: string,
+    sortBy: string
+  ): string => {
+    return `${query}|${author}|${contentType}|${sortBy}`;
+  };
 
   const handleSubmit = async (
     e?: React.FormEvent,
-    overrideFilters?: { author?: string; contentType?: string; sortBy?: string }
+    overrideFilters?: {
+      author?: string;
+      contentType?: string;
+      sortBy?: string;
+      offset?: number;
+    },
+    isPaginationOnly: boolean = false
   ) => {
     if (e) e.preventDefault();
     if (!query.trim()) return;
 
     setLoading(true);
     setError(null);
-    setSearchData(null);
 
     // Use override values if provided, otherwise use current state
     const searchAuthor =
@@ -34,6 +55,28 @@ function App() {
         : contentType;
     const searchSortBy =
       overrideFilters?.sortBy !== undefined ? overrideFilters.sortBy : sortBy;
+    const searchOffset =
+      overrideFilters?.offset !== undefined ? overrideFilters.offset : offset;
+
+    // Create query signature for caching
+    const querySig = getQuerySignature(
+      query.trim(),
+      searchAuthor,
+      searchContentType,
+      searchSortBy
+    );
+
+    // Check if we have cached summary/enhanced query for this query
+    const cached = queryCache.get(querySig);
+    const shouldSkipSummary = isPaginationOnly && cached;
+
+    // Determine the offset to use
+    const finalOffset = isPaginationOnly ? searchOffset : 0;
+
+    // Reset offset state if this is a new search (not pagination)
+    if (!isPaginationOnly) {
+      setOffset(0);
+    }
 
     try {
       const response = await searchPosts({
@@ -41,8 +84,30 @@ function App() {
         author: searchAuthor.trim() || undefined,
         content_type: searchContentType || undefined,
         sort_by: searchSortBy,
+        limit: limit,
+        offset: finalOffset,
+        include_summary: !shouldSkipSummary, // Skip summary if we have cached one
+        use_grok_enhancement: !shouldSkipSummary, // Skip query enhancement if we have cached one
       });
+
+      // If we skipped summary generation, use cached values
+      if (shouldSkipSummary && cached) {
+        response.summary = cached.summary;
+        response.enhanced_query = cached.enhanced_query;
+      } else if (response.summary || response.enhanced_query) {
+        // Cache the summary and enhanced query for future pagination
+        setQueryCache((prev) => {
+          const newCache = new Map(prev);
+          newCache.set(querySig, {
+            summary: response.summary,
+            enhanced_query: response.enhanced_query,
+          });
+          return newCache;
+        });
+      }
+
       setSearchData(response);
+      setOffset(finalOffset);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Search failed");
       setSearchData(null);
@@ -65,6 +130,13 @@ function App() {
     setAuthor("");
     setContentType("");
     setSortBy("relevance");
+    setOffset(0);
+    setQueryCache(new Map());
+  };
+
+  const handlePageChange = (newOffset: number) => {
+    setOffset(newOffset);
+    handleSubmit(undefined, { offset: newOffset }, true);
   };
 
   const showCompactLayout = loading || searchData !== null;
@@ -239,7 +311,11 @@ function App() {
             </div>
           )}
 
-          <SearchResults data={searchData} loading={loading} />
+          <SearchResults
+            data={searchData}
+            loading={loading}
+            onPageChange={handlePageChange}
+          />
         </div>
       </main>
     </div>

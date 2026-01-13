@@ -1,13 +1,19 @@
 import type { Post, SearchResponse } from "../types";
 import PostCard from "./PostCard";
 import Summary from "./Summary";
+import Pagination from "./Pagination";
 
 interface SearchResultsProps {
   data: SearchResponse | null;
   loading: boolean;
+  onPageChange: (offset: number) => void;
 }
 
-export default function SearchResults({ data, loading }: SearchResultsProps) {
+export default function SearchResults({
+  data,
+  loading,
+  onPageChange,
+}: SearchResultsProps) {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -42,17 +48,13 @@ export default function SearchResults({ data, loading }: SearchResultsProps) {
         for "{data.query}"
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-2">
         {data.results.map((post: Post) => (
           <PostCard key={post.id} post={post} />
         ))}
       </div>
 
-      {data.total > data.results.length && (
-        <div className="mt-6 text-center text-sm text-gray-500">
-          Showing {data.results.length} of {data.total} results
-        </div>
-      )}
+      <Pagination data={data} onPageChange={onPageChange} />
     </div>
   );
 }

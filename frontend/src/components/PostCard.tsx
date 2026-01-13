@@ -26,53 +26,51 @@ export default function PostCard({ post }: PostCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between mb-3">
+    <div className="bg-white rounded-lg border border-gray-200 p-3 hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white font-semibold">
+          <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white text-xs font-semibold">
             {post.author[0].toUpperCase()}
           </div>
           <div>
-            <div className="font-semibold text-gray-900">
+            <div className="font-semibold text-sm text-gray-900">
               {post.author_display_name || `@${post.author}`}
             </div>
-            <div className="text-sm text-gray-500">@{post.author}</div>
+            <div className="text-xs text-gray-500">@{post.author}</div>
           </div>
         </div>
-        <div className="text-sm text-gray-500">
+        <div className="text-xs text-gray-500">
           {formatDate(post.timestamp)}
         </div>
       </div>
 
-      <p className="text-gray-800 mb-4 whitespace-pre-wrap">{post.content}</p>
+      <p className="text-sm text-gray-800 mb-2 whitespace-pre-wrap">
+        {post.content}
+      </p>
 
-      {post.hashtags && post.hashtags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-3">
-          {post.hashtags.map((tag, idx) => (
+      {(post.hashtags && post.hashtags.length > 0) ||
+      (post.mentions && post.mentions.length > 0) ? (
+        <div className="flex flex-wrap gap-1.5 mb-2">
+          {post.hashtags?.map((tag, idx) => (
             <span
               key={idx}
-              className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm"
+              className="px-1.5 py-0.5 bg-gray-100 text-gray-700 rounded text-xs"
             >
               #{tag}
             </span>
           ))}
-        </div>
-      )}
-
-      {post.mentions && post.mentions.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-3">
-          {post.mentions.map((mention, idx) => (
+          {post.mentions?.map((mention, idx) => (
             <span
               key={idx}
-              className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm"
+              className="px-1.5 py-0.5 bg-gray-100 text-gray-700 rounded text-xs"
             >
               @{mention}
             </span>
           ))}
         </div>
-      )}
+      ) : null}
 
-      <div className="flex items-center gap-6 text-sm text-gray-600 pt-3 border-t border-gray-100">
+      <div className="flex items-center gap-4 text-xs text-gray-600 pt-2 border-t border-gray-100">
         <div className="flex items-center gap-1">
           <span className="text-red-500">❤️</span>
           <span>{post.likes.toLocaleString()}</span>
@@ -91,18 +89,17 @@ export default function PostCard({ post }: PostCardProps) {
             <span>{post.views.toLocaleString()}</span>
           </div>
         )}
+        {post.post_url && (
+          <a
+            href={post.post_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-auto text-black hover:underline text-xs"
+          >
+            View on X →
+          </a>
+        )}
       </div>
-
-      {post.post_url && (
-        <a
-          href={post.post_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-3 inline-block text-black hover:underline text-sm"
-        >
-          View on X →
-        </a>
-      )}
     </div>
   );
 }

@@ -10,10 +10,14 @@ export const searchPosts = async (
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      limit: 20,
-      use_grok_enhancement: true,
-      include_summary: true,
-      ...request,
+      query: request.query,
+      limit: request.limit || 20,
+      offset: request.offset || 0,
+      author: request.author,
+      content_type: request.content_type,
+      sort_by: request.sort_by || "relevance",
+      use_grok_enhancement: request.use_grok_enhancement !== false,
+      include_summary: request.include_summary !== false,
     }),
   });
 

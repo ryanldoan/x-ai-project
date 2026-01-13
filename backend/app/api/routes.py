@@ -79,7 +79,8 @@ async def search_posts(
         enhanced_query_data = None
         search_query = request.query
         
-        if request.use_grok_enhancement:
+        # Only enhance query if summary is being generated (skip for pagination-only requests)
+        if request.use_grok_enhancement and request.include_summary:
             try:
                 enhanced_query_data = await grok_client.enhance_query(request.query)
                 # Use expanded terms from Grok if available
