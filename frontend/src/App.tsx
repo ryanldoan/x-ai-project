@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { SearchResponse } from "./types";
 import { searchPosts } from "./services/api";
 import SearchResults from "./components/SearchResults";
+import Filters from "./components/Filters";
 
 function App() {
   const [query, setQuery] = useState("");
@@ -9,7 +10,14 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e?: React.FormEvent) => {
+  const [author, setAuthor] = useState("");
+  const [contentType, setContentType] = useState("");
+  const [sortBy, setSortBy] = useState("relevance");
+
+  const handleSubmit = async (
+    e?: React.FormEvent,
+    overrideFilters?: { author?: string; contentType?: string; sortBy?: string }
+  ) => {
     if (e) e.preventDefault();
     if (!query.trim()) return;
 
@@ -17,9 +25,22 @@ function App() {
     setError(null);
     setSearchData(null);
 
+    // Use override values if provided, otherwise use current state
+    const searchAuthor =
+      overrideFilters?.author !== undefined ? overrideFilters.author : author;
+    const searchContentType =
+      overrideFilters?.contentType !== undefined
+        ? overrideFilters.contentType
+        : contentType;
+    const searchSortBy =
+      overrideFilters?.sortBy !== undefined ? overrideFilters.sortBy : sortBy;
+
     try {
       const response = await searchPosts({
         query: query.trim(),
+        author: searchAuthor.trim() || undefined,
+        content_type: searchContentType || undefined,
+        sort_by: searchSortBy,
       });
       setSearchData(response);
     } catch (err) {
@@ -41,6 +62,9 @@ function App() {
     setQuery("");
     setSearchData(null);
     setError(null);
+    setAuthor("");
+    setContentType("");
+    setSortBy("relevance");
   };
 
   const showCompactLayout = loading || searchData !== null;
@@ -158,6 +182,58 @@ function App() {
               )}
             </div>
           </form>
+
+          {!showCompactLayout && (
+            <Filters
+              author={author}
+              contentType={contentType}
+              sortBy={sortBy}
+              onAuthorChange={setAuthor}
+              onContentTypeChange={setContentType}
+              onSortByChange={setSortBy}
+            />
+          )}
+
+          {showCompactLayout && (
+            <Filters
+              author={author}
+              contentType={contentType}
+              sortBy={sortBy}
+              onAuthorChange={(value: string) => {
+                setAuthor(value);
+                // Trigger new search with updated author filter (pass new value directly)
+                if (query.trim()) {
+                  handleSubmit(undefined, {
+                    author: value,
+                    contentType,
+                    sortBy,
+                  });
+                }
+              }}
+              onContentTypeChange={(value: string) => {
+                setContentType(value);
+                // Trigger new search with updated content type filter (pass new value directly)
+                if (query.trim()) {
+                  handleSubmit(undefined, {
+                    author,
+                    contentType: value,
+                    sortBy,
+                  });
+                }
+              }}
+              onSortByChange={(value: string) => {
+                setSortBy(value);
+                // Trigger new search with updated sort (pass new value directly)
+                if (query.trim()) {
+                  handleSubmit(undefined, {
+                    author,
+                    contentType,
+                    sortBy: value,
+                  });
+                }
+              }}
+            />
+          )}
 
           {error && (
             <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-center">

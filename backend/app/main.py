@@ -6,8 +6,8 @@ from app.models.database import init_db
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="X AI Search API",
-    description="Grok-powered search system for X (Twitter) posts",
+    title="Groktor-X",
+    description="Grok-powered search system for X posts",
     version="1.0.0"
 )
 
