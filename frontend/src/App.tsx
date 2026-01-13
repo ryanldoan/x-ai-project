@@ -1,29 +1,83 @@
 import { useState } from "react";
+import type { SearchResponse } from "./types";
+import { searchPosts } from "./services/api";
+import SearchResults from "./components/SearchResults";
 
 function App() {
   const [query, setQuery] = useState("");
+  const [searchData, setSearchData] = useState<SearchResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (query.trim()) {
-      console.log("Searching for:", query);
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!query.trim()) return;
+
+    setLoading(true);
+    setError(null);
+    setSearchData(null);
+
+    try {
+      const response = await searchPosts({
+        query: query.trim(),
+      });
+      setSearchData(response);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Search failed");
+      setSearchData(null);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleTrendingClick = (trendingQuery: string) => {
+    setQuery(trendingQuery);
+    setTimeout(() => {
+      handleSubmit();
+    }, 100);
+  };
+
+  const handleLogoClick = () => {
+    setQuery("");
+    setSearchData(null);
+    setError(null);
+  };
+
+  const showCompactLayout = loading || searchData !== null;
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <main className="flex-1 flex items-center justify-center px-4">
-        <div className="w-full max-w-3xl">
-          <div className="text-center mb-4">
-            <h1 className="text-7xl sm:text-8xl font-bold text-black mb-4 tracking-tight">
-              Groktor-X
-            </h1>
-            <p className="text-lg text-gray-600">
-              AI-enhanced queries, semantic matching, and intelligent summaries.
-            </p>
-          </div>
+      <main
+        className={`flex-1 ${
+          showCompactLayout ? "pt-6" : "flex items-center justify-center"
+        } px-4`}
+      >
+        <div className="w-full max-w-3xl mx-auto">
+          {showCompactLayout ? (
+            <div className="mb-6">
+              <h1
+                className="text-3xl font-bold text-black mb-2 tracking-tight cursor-pointer hover:opacity-70 transition-opacity"
+                onClick={handleLogoClick}
+              >
+                Groktor-X
+              </h1>
+            </div>
+          ) : (
+            <div className="text-center mb-4">
+              <h1 className="text-7xl sm:text-8xl font-bold text-black mb-4 tracking-tight">
+                Groktor-X
+              </h1>
+              <p className="text-lg text-gray-600">
+                AI-enhanced queries, semantic matching, and intelligent
+                summaries.
+              </p>
+            </div>
+          )}
 
-          <form onSubmit={handleSubmit} className="mb-8">
+          <form
+            onSubmit={handleSubmit}
+            className={showCompactLayout ? "mb-6" : "mb-8"}
+          >
             <div className="relative group">
               <div className="relative">
                 <input
@@ -73,24 +127,45 @@ function App() {
                 </button>
               </div>
 
-              <div className="mt-4 text-center">
-                <p className="text-sm text-gray-500 mb-2">
-                  Trending:{" "}
-                  <span className="text-black font-medium hover:underline cursor-pointer">
-                    AI
-                  </span>{" "}
-                  •{" "}
-                  <span className="text-black font-medium hover:underline cursor-pointer">
-                    AI AND space
-                  </span>{" "}
-                  •{" "}
-                  <span className="text-black font-medium hover:underline cursor-pointer">
-                    technology OR innovation
-                  </span>
-                </p>
-              </div>
+              {!showCompactLayout && (
+                <div className="mt-4 text-center">
+                  <p className="text-sm text-gray-500 mb-2">
+                    Trending:{" "}
+                    <span
+                      className="text-black font-medium hover:underline cursor-pointer"
+                      onClick={() => handleTrendingClick("AI")}
+                    >
+                      AI
+                    </span>{" "}
+                    •{" "}
+                    <span
+                      className="text-black font-medium hover:underline cursor-pointer"
+                      onClick={() => handleTrendingClick("AI AND space")}
+                    >
+                      AI AND space
+                    </span>{" "}
+                    •{" "}
+                    <span
+                      className="text-black font-medium hover:underline cursor-pointer"
+                      onClick={() =>
+                        handleTrendingClick("technology OR innovation")
+                      }
+                    >
+                      technology OR innovation
+                    </span>
+                  </p>
+                </div>
+              )}
             </div>
           </form>
+
+          {error && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-center">
+              {error}
+            </div>
+          )}
+
+          <SearchResults data={searchData} loading={loading} />
         </div>
       </main>
     </div>
