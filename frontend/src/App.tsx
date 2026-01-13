@@ -152,6 +152,17 @@ function App() {
               </div>
 
               {!showCompactLayout && (
+                <Filters
+                  author={author}
+                  contentType={contentType}
+                  sortBy={sortBy}
+                  onAuthorChange={setAuthor}
+                  onContentTypeChange={setContentType}
+                  onSortByChange={setSortBy}
+                />
+              )}
+
+              {!showCompactLayout && (
                 <div className="mt-4 text-center">
                   <p className="text-sm text-gray-500 mb-2">
                     Trending:{" "}
@@ -182,17 +193,6 @@ function App() {
               )}
             </div>
           </form>
-
-          {!showCompactLayout && (
-            <Filters
-              author={author}
-              contentType={contentType}
-              sortBy={sortBy}
-              onAuthorChange={setAuthor}
-              onContentTypeChange={setContentType}
-              onSortByChange={setSortBy}
-            />
-          )}
 
           {showCompactLayout && (
             <Filters

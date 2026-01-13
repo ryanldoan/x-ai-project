@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 interface SummaryProps {
   summary?: string;
   enhancedQuery?: {
@@ -9,7 +11,20 @@ interface SummaryProps {
 }
 
 export default function Summary({ summary, enhancedQuery }: SummaryProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   if (!summary && !enhancedQuery) return null;
+
+  const wordCount = summary
+    ? summary.split(/\s+/).filter((word) => word.length > 0).length
+    : 0;
+  const shouldTruncate = wordCount > 80;
+
+  let displaySummary = summary || "";
+  if (shouldTruncate && !isExpanded && summary) {
+    const words = summary.split(/\s+/);
+    displaySummary = words.slice(0, 80).join(" ") + "...";
+  }
 
   return (
     <div className="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-200">
@@ -39,7 +54,17 @@ export default function Summary({ summary, enhancedQuery }: SummaryProps) {
           <h3 className="text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
             Summary
           </h3>
-          <p className="text-sm text-gray-700 leading-relaxed">{summary}</p>
+          <p className="text-sm text-gray-700 leading-relaxed">
+            {displaySummary}
+          </p>
+          {shouldTruncate && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="mt-2 text-sm text-black hover:underline font-medium"
+            >
+              {isExpanded ? "View Less" : "View More"}
+            </button>
+          )}
         </div>
       )}
     </div>
